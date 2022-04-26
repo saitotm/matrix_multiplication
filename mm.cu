@@ -3,21 +3,14 @@
 
 #define N 3
 
-__device__ int calc_index(int n, int m, int col_x, int col_y) { return m * col_x + col_y; }
+__global__ void mm(double* a, double* b, double* c, int dim_l, int dim_m, int dim_n) {
+    int size = dim_l * dim_n;
 
-__global__ void mm(double* a, double* b, double* c, int l, int m, int n) {
-    int size = l * n;
-    for (int i = 0; i < l; ++i) {
-        for (int j = 0; j < n; ++j) {
-            c[calc_index(l, m, i, j)] = 0;
-        }
-    }
-
-    for (int i = 0; i < l; i++) {
-        for (int j = 0; j < m; j++) {
-            for (int k = 0; k < n; k++) {
-                c[calc_index(l, m, i, j)] +=
-                    a[calc_index(l, m, i, k)] * b[calc_index(m, n, k, j)];
+    for (int i = 0; i < dim_l; i++) {
+        for (int j = 0; j < dim_m; j++) {
+            for (int k = 0; k < dim_n; k++) {
+                c[dim_m * i + j] +=
+                    a[dim_m * i + k] * b[dim_n * k + j];
             }
         }
     }
@@ -30,6 +23,7 @@ int main() {
     for (int i = 0; i < N * N; ++i) {
         a[i] = 0;
         b[i] = 0;
+        c[i] = 0;
     }
 
     for (int i = 0; i < N; ++i) {
@@ -43,6 +37,7 @@ int main() {
 
     cudaMemcpy(dev_a, a, N * N * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(dev_b, b, N * N * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_c, c, N * N * sizeof(double), cudaMemcpyHostToDevice);
 
     dim3 grid(1);
     dim3 block(1);
