@@ -8,10 +8,12 @@ project(MatrixProduct LANGUAGES CUDA CXX)
 
 # Create Main project
 set(SOURCES
+	main.cu
 	mm.cu
 )
 
 set(HEADERS
+	mm.cuh
 )
 
 add_executable(main
